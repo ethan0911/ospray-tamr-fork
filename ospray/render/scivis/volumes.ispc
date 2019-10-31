@@ -42,12 +42,15 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
   if (jitter > 1.f)
     jitter -= 1.f;
 
-  ray.t0 += jitter;
+  //ray.t0 += jitter;
 
   foreach_unique(m in model)
   {
     Volume *uniform volume       = m->volume;
     TransferFunction *uniform tf = m->transferFunction;
+
+    const uniform float baseStepSize = 0.1;//m->samplingStep / m->samplingRate;
+    float lastSamplePos = ray.t0;
 
     while (ray.t0 <= ray.t && alpha < 0.99f) {
       const float sample = volume->sample(volume, ray.org + ray.t0 * ray.dir);
@@ -57,9 +60,16 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
         float sampleAlpha =
             tf->getIntegratedOpacityForValue(tf, pSample, sample);
 
+        if (lastSamplePos != ray.t0) {
+          // TODO: I'll send back the cell width in the "time" param, which will
+          // be used as our sample distance. Then the TAMR volume will give us
+          // back something like the "min cell width" which would be our base sampling rate.
+          //sampleAlpha = 1.f - powf(1.f - sampleAlpha, (ray.t0 - lastSamplePos) / ray.time);
+        }
+
         pSample = sample;
 
-        const float clampedOpacity = clamp(sampleAlpha / m->samplingRate);
+        const float clampedOpacity = clamp(sampleAlpha);// / m->samplingRate);
 
         sampleColor = sampleColor * clampedOpacity;
         sampleAlpha = clampedOpacity;
@@ -68,6 +78,7 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
         alpha = alpha + ((1.f - alpha) * sampleAlpha);
       }
 
+      lastSamplePos = ray.t0;
       volume->stepRay(volume, tf, ray, m->samplingRate);
     }
   }
