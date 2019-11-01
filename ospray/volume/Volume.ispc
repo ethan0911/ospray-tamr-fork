@@ -80,6 +80,7 @@ void Volume_Constructor(Volume *uniform self, void *uniform cppEquivalent)
   self->boundingBox = make_box3f(make_vec3f(0.f), make_vec3f(1.f));
 
   self->volumeID = -1;
+  self->integrateVolumeInterval = NULL;
 }
 
 export void Volume_getBoundingBox(uniform box3f *uniform ret,

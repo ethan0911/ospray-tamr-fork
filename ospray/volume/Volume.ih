@@ -63,6 +63,12 @@ struct Volume
       // ray.u contains ray-space intersection error, i.e. the epsilon
       varying Ray &ray);
 
+  void (*integrateVolumeInterval)(
+      const void *uniform _self,
+      TransferFunction *uniform tfn,
+      varying Ray &ray,
+      const varying range1f &interval);
+
   /*! Bounding box for the volume in world coordinates.
       This is an internal derived parameter and not meant to be
       redefined externally.

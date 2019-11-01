@@ -49,37 +49,29 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
     Volume *uniform volume       = m->volume;
     TransferFunction *uniform tf = m->transferFunction;
 
-    const uniform float baseStepSize = 0.1;//m->samplingStep / m->samplingRate;
-    float lastSamplePos = ray.t0;
+    if (volume->integrateVolumeInterval) {
+      volume->integrateVolumeInterval(volume, tf, ray, interval.interval);
+    } else {
+      while (ray.t0 <= ray.t && alpha < 0.99f) {
+        const float sample = volume->sample(volume, ray.org + ray.t0 * ray.dir);
 
-    while (ray.t0 <= ray.t && alpha < 0.99f) {
-      const float sample = volume->sample(volume, ray.org + ray.t0 * ray.dir);
-
-      if (!isnan(sample)) {
-        vec3f sampleColor = tf->getIntegratedColorForValue(tf, pSample, sample);
-        float sampleAlpha =
+        if (!isnan(sample)) {
+          vec3f sampleColor = tf->getIntegratedColorForValue(tf, pSample, sample);
+          float sampleAlpha =
             tf->getIntegratedOpacityForValue(tf, pSample, sample);
 
-        if (lastSamplePos != ray.t0) {
-          // TODO: I'll send back the cell width in the "time" param, which will
-          // be used as our sample distance. Then the TAMR volume will give us
-          // back something like the "min cell width" which would be our base sampling rate.
-          //sampleAlpha = 1.f - powf(1.f - sampleAlpha, (ray.t0 - lastSamplePos) / ray.time);
+          pSample = sample;
+
+          const float clampedOpacity = clamp(sampleAlpha/ m->samplingRate);
+
+          sampleColor = sampleColor * clampedOpacity;
+          sampleAlpha = clampedOpacity;
+
+          color = color + ((1.f - alpha) * sampleColor);
+          alpha = alpha + ((1.f - alpha) * sampleAlpha);
         }
-
-        pSample = sample;
-
-        const float clampedOpacity = clamp(sampleAlpha);// / m->samplingRate);
-
-        sampleColor = sampleColor * clampedOpacity;
-        sampleAlpha = clampedOpacity;
-
-        color = color + ((1.f - alpha) * sampleColor);
-        alpha = alpha + ((1.f - alpha) * sampleAlpha);
+        volume->stepRay(volume, tf, ray, m->samplingRate);
       }
-
-      lastSamplePos = ray.t0;
-      volume->stepRay(volume, tf, ray, m->samplingRate);
     }
   }
 
