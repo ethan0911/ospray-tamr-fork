@@ -42,7 +42,7 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
   if (jitter > 1.f)
     jitter -= 1.f;
 
-  //ray.t0 += jitter;
+  // ray.t0 += jitter;
 
   foreach_unique(m in model)
   {
@@ -50,19 +50,25 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
     TransferFunction *uniform tf = m->transferFunction;
 
     if (volume->integrateVolumeInterval) {
-      volume->integrateVolumeInterval(volume, tf, ray, interval.interval);
+      vec4f result =
+          volume->integrateVolumeInterval(volume, tf, ray, interval.interval);
+      color = make_vec3f(result);
+      alpha = result.w;
+      // color = color + ((1.f - alpha) * sampleColor);
+      // alpha = alpha + ((1.f - alpha) * sampleAlpha);
     } else {
       while (ray.t0 <= ray.t && alpha < 0.99f) {
         const float sample = volume->sample(volume, ray.org + ray.t0 * ray.dir);
 
         if (!isnan(sample)) {
-          vec3f sampleColor = tf->getIntegratedColorForValue(tf, pSample, sample);
+          vec3f sampleColor =
+              tf->getIntegratedColorForValue(tf, pSample, sample);
           float sampleAlpha =
-            tf->getIntegratedOpacityForValue(tf, pSample, sample);
+              tf->getIntegratedOpacityForValue(tf, pSample, sample);
 
           pSample = sample;
 
-          const float clampedOpacity = clamp(sampleAlpha/ m->samplingRate);
+          const float clampedOpacity = clamp(sampleAlpha);// / m->samplingRate);
 
           sampleColor = sampleColor * clampedOpacity;
           sampleAlpha = clampedOpacity;

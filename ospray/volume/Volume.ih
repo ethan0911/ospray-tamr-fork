@@ -63,7 +63,7 @@ struct Volume
       // ray.u contains ray-space intersection error, i.e. the epsilon
       varying Ray &ray);
 
-  void (*integrateVolumeInterval)(
+  vec4f (*integrateVolumeInterval)(
       const void *uniform _self,
       TransferFunction *uniform tfn,
       varying Ray &ray,
