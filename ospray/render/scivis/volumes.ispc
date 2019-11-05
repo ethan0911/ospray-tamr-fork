@@ -31,19 +31,6 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
 
   float pSample = -1.f;
 
-  // Ray offset for this sample, as a fraction of the nominal step size.
-  float jitter = precomputedHalton2(sample.sampleID.z);
-  int ix       = sample.sampleID.x % 4;
-  int iy       = sample.sampleID.y % 4;
-
-  int patternID = ix + 4 * iy;
-  jitter += precomputedHalton3(patternID);
-
-  if (jitter > 1.f)
-    jitter -= 1.f;
-
-  // ray.t0 += jitter;
-
   foreach_unique(m in model)
   {
     Volume *uniform volume       = m->volume;
@@ -51,7 +38,7 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
 
     if (volume->integrateVolumeInterval) {
       vec4f result =
-          volume->integrateVolumeInterval(volume, tf, ray, interval.interval);
+          volume->integrateVolumeInterval(volume, tf, ray, interval.interval, sample);
       color = make_vec3f(result);
       alpha = result.w;
       // color = color + ((1.f - alpha) * sampleColor);

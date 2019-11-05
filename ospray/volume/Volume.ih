@@ -22,6 +22,7 @@
 #include "common/Intersect.ih"
 
 struct TransferFunction;
+struct ScreenSample;
 
 //! \brief Variables and methods common to all subtypes of the Volume
 //!  class, an abstraction for the concrete object which performs the
@@ -67,7 +68,8 @@ struct Volume
       const void *uniform _self,
       TransferFunction *uniform tfn,
       varying Ray &ray,
-      const varying range1f &interval);
+      const varying range1f &interval,
+      const varying ScreenSample &sample);
 
   /*! Bounding box for the volume in world coordinates.
       This is an internal derived parameter and not meant to be
