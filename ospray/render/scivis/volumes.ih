@@ -21,4 +21,5 @@
 
 vec4f integrateVolumeInterval(const ScreenSample &sample,
                               const VolumeInterval &interval,
+                              const World *uniform world,
                               Ray &ray);

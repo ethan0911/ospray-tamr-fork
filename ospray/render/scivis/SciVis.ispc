@@ -90,7 +90,7 @@ void SciVis_renderSample(Renderer *uniform _self,
              volumeInterval.interval.lower,
              volumeInterval.interval.upper);
 
-      volumeColor = integrateVolumeInterval(sample, volumeInterval, volumeRay);
+      volumeColor = integrateVolumeInterval(sample, volumeInterval, world, volumeRay);
     }
 
     vec4f blendedColor = make_vec4f(0.f);

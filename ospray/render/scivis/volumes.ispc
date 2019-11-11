@@ -22,6 +22,7 @@
 
 vec4f integrateVolumeInterval(const ScreenSample &sample,
                               const VolumeInterval &interval,
+                              const World *uniform world,
                               Ray &ray)
 {
   VolumetricModel *varying model = interval.volumetricModel;
@@ -37,10 +38,16 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
     TransferFunction *uniform tf = m->transferFunction;
 
     if (volume->integrateVolumeInterval) {
+
+      Ray vray = ray;
+      vray.org = xfmPoint(interval.xfm, ray.org);
+      vray.dir = xfmVector(interval.xfm.l, ray.dir);
+
       vec4f result =
-          volume->integrateVolumeInterval(volume, tf, ray, interval.interval, sample);
+          volume->integrateVolumeInterval(volume, tf, vray, interval.interval, sample);
       color = make_vec3f(result);
       alpha = result.w;
+
       // color = color + ((1.f - alpha) * sampleColor);
       // alpha = alpha + ((1.f - alpha) * sampleAlpha);
     } else {
