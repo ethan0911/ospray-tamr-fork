@@ -153,6 +153,9 @@ void samplePath(const PathContext& pathContext,
         DifferentialGeometry lookup;
         initDgFromTexCoord(lookup, clamp2edge(pathContext.context->backplate, *pathContext.pixel));
         pathState.contribution = pathState.contribution + pathState.throughput * get3f(pathContext.context->backplate, lookup);
+      } else {
+        // hard-coded white bgcolor
+        pathState.contribution = pathState.contribution + pathState.throughput * make_vec3f(1.f);
       }
     }    
 
