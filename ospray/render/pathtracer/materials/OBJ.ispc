@@ -65,8 +65,7 @@ const varying BSDF* varying OBJ_getBSDF(const uniform PathTraceMaterial* uniform
     d *= Kd_from_map.w;
   }
   Kd = Kd * d * make_vec3f(dg.color);
-  if (reduce_max(Kd) > 0.0f)
-    MultiBSDF_add(bsdf, Lambert_create(ctx, shadingFrame, Kd), 1.f, luminance(Kd));
+  MultiBSDF_add(bsdf, Lambert_create(ctx, shadingFrame, Kd), 1.f, luminance(Kd));
 
   /*! transmission component */
   vec3f T = self->Tf * d + make_vec3f(1.f - d);
