@@ -21,13 +21,23 @@
 #include "SciVisMaterial.ih"
 #include "surfaces.ih"
 
-inline vec4f getSurfaceColor(const DifferentialGeometry &dg)
+inline vec4f getSurfaceColor(DifferentialGeometry dg,
+                             const World *uniform world,
+                             const varying Ray &ray)
 {
   const SciVisMaterial *mat = (const SciVisMaterial *)dg.material;
 
   vec3f surfaceColor = make_vec3f(1.f);
   float opacity      = 1.f;
   if (mat) {
+    foreach_unique(instID in ray.instID)
+    {
+      if (instID != RTC_INVALID_GEOMETRY_ID) {
+        Instance *uniform instance = *(world->instances + instID);
+        dg.P = xfmPoint(instance->xfm, dg.P);
+      }
+    }
+
     foreach_unique(m in mat)
     {
       surfaceColor = m->Kd;
@@ -93,7 +103,7 @@ SSI computeShading(const SciVis *uniform self,
 {
   SSI retval;
 
-  const vec4f surfaceColor = getSurfaceColor(dg);
+  const vec4f surfaceColor = getSurfaceColor(dg, world, sample.ray);
 
   const vec3f color   = make_vec3f(surfaceColor);
   const float opacity = surfaceColor.w;
