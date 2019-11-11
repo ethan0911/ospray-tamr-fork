@@ -25,14 +25,11 @@ vec4f TextureVolume_get(const Texture2D *uniform self,
   Volume *uniform volume           = (Volume * uniform) instance->volume;
 
   const uniform box3f bounds = instance->boundingBox;
+  const vec3f pt = clamp(dg.P, bounds.lower, bounds.upper);
 
-  cif (box_contains(bounds, dg.P)) {
-    const float sample = Volume_getSample(volume, dg.P);
-    return make_vec4f(VolumetricModel_getColor(instance, sample),
-                      1.f);//VolumetricModel_getOpacity(instance, sample));
-  } else {
-    return make_vec4f(0.f);
-  }
+  const float sample = Volume_getSample(volume, pt);
+  return make_vec4f(VolumetricModel_getColor(instance, sample),
+      1.f);//VolumetricModel_getOpacity(instance, sample));
 }
 
 vec3f TextureVolume_getN(const Texture2D *uniform self,
