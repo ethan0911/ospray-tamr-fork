@@ -50,6 +50,7 @@ vec4f integrateVolumeInterval(const ScreenSample &sample,
 
       // color = color + ((1.f - alpha) * sampleColor);
       // alpha = alpha + ((1.f - alpha) * sampleAlpha);
+      ray.t0 = ray.t;
     } else {
       while (ray.t0 <= ray.t && alpha < 0.99f) {
         const float sample = volume->sample(volume, ray.org + ray.t0 * ray.dir);
