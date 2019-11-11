@@ -29,7 +29,7 @@ vec4f TextureVolume_get(const Texture2D *uniform self,
   cif (box_contains(bounds, dg.P)) {
     const float sample = Volume_getSample(volume, dg.P);
     return make_vec4f(VolumetricModel_getColor(instance, sample),
-                      VolumetricModel_getOpacity(instance, sample));
+                      1.f);//VolumetricModel_getOpacity(instance, sample));
   } else {
     return make_vec4f(0.f);
   }
