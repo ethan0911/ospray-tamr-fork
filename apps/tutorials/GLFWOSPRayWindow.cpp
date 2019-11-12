@@ -17,8 +17,9 @@
 #include "GLFWOSPRayWindow.h"
 #include <iostream>
 #include <stdexcept>
-
 #include <imgui.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../external/stb_image/stb_image_write.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
 GLFWOSPRayWindow *GLFWOSPRayWindow::activeWindow = nullptr;
@@ -96,6 +97,24 @@ GLFWOSPRayWindow::GLFWOSPRayWindow(const vec2i &windowSize,
                          case GLFW_KEY_Q:
                            g_quitNextFrame = true;
                            break;
+                         case GLFW_KEY_P:
+                           activeWindow->takeScreenshot = true;
+                           break;
+                         case GLFW_KEY_C: {
+                            const auto &cam = activeWindow->getArcballCamera();
+                            std::cout << "Camera params:\n"
+                                << "--eye " << cam->eyePos().x
+                                << " " << cam->eyePos().y
+                                << " " << cam->eyePos().z
+                                << " --dir " << cam->lookDir().x
+                                << " " << cam->lookDir().y
+                                << " " << cam->lookDir().z
+                                << " --up " << cam->upDir().x
+                                << " " << cam->upDir().y
+                                << " " << cam->upDir().z
+                                << "\n";
+                            break;
+                           }
                          }
                        }
                      });
@@ -372,6 +391,20 @@ void GLFWOSPRayWindow::display()
                  glType,
                  fb);
 
+    if (takeScreenshot && fbFormat != OSP_FB_RGBA32F && !showAlbedo) {
+        takeScreenshot = false;
+        // Remove the opacity part of the image if any
+        std::vector<uint8_t> imgData(reinterpret_cast<const uint8_t*>(fb),
+                reinterpret_cast<const uint8_t*>(fb) + windowSize.x * windowSize.y * 4);
+        for (size_t i = 0; i < windowSize.x * windowSize.y; ++i) {
+            imgData[i * 4 + 3] = 255;
+        }
+        stbi_flip_vertically_on_write(1);
+        stbi_write_png("tamr_screenshot.png", windowSize.x, windowSize.y, 4,
+                imgData.data(), windowSize.x * 4);
+        std::cout << "Image saved to 'tamr_screenshot.png'\n";
+    }
+
     ospUnmapFrameBuffer(fb, framebuffer);
 
     auto handles = objectsToCommit.consume();
@@ -433,6 +466,19 @@ void GLFWOSPRayWindow::waitOnOSPRayFrame()
 void GLFWOSPRayWindow::addObjectToCommit(OSPObject obj)
 {
   objectsToCommit.push_back(obj);
+}
+
+void GLFWOSPRayWindow::setCamera(const vec3f &camEye,
+        const vec3f &camDir,
+        const vec3f &camUp,
+        float fov)
+{
+    ospSetFloat(camera, "fovy", fov);
+
+    ospSetVec3fv(camera, "position", &camEye.x);
+    ospSetVec3fv(camera, "direction", &camDir.x);
+    ospSetVec3fv(camera, "up", &camUp.x);
+    addObjectToCommit(camera);
 }
 
 void GLFWOSPRayWindow::updateTitleBar()

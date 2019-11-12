@@ -59,6 +59,11 @@ class GLFWOSPRayWindow
 
   void addObjectToCommit(OSPObject obj);
 
+  void setCamera(const vec3f &camEye,
+          const vec3f &camDir,
+          const vec3f &camUp,
+          float fov);
+
   std::unique_ptr<ArcballCamera> &getArcballCamera()
   {
     return arcballCamera;
@@ -107,6 +112,8 @@ class GLFWOSPRayWindow
 
   // toggles display of ImGui UI, if an ImGui callback is provided
   bool showUi = true;
+
+  bool takeScreenshot = false;
 
   // optional registered ImGui callback, called during every frame to build UI
   std::function<void()> uiCallback;
