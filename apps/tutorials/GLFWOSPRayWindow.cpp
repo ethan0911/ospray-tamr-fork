@@ -132,6 +132,7 @@ GLFWOSPRayWindow::GLFWOSPRayWindow(const vec2i &windowSize,
   // create camera
   camera = ospNewCamera("perspective");
   ospSetFloat(camera, "aspect", windowSize.x / float(windowSize.y));
+  ospSetFloat(camera, "fovy", 40.f);
   updateCamera();
   commitCamera();
 
