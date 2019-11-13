@@ -16,6 +16,7 @@
 
 #include "GLFWOSPRayWindow.h"
 #include <iostream>
+#include <limits>
 #include <stdexcept>
 #include <imgui.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -368,6 +369,17 @@ void GLFWOSPRayWindow::display()
                                                               displayStart);
 
     latestFPS = 1000.f / float(durationMilliseconds.count());
+    if(latestFPS < std::numeric_limits<float>::infinity()){
+      fpsQueue.push(latestFPS);
+      avgFPS += latestFPS/float(movingAvgWindowSize);
+      if (fpsQueue.size() == movingAvgWindowSize + 1){
+        float oldestFPS = fpsQueue.front();
+        fpsQueue.pop(); // remove oldest element in moving window
+        avgFPS -= oldestFPS / float(movingAvgWindowSize);  // remove this value from the moving average
+      } else if (fpsQueue.size() > movingAvgWindowSize + 1){
+        throw std::runtime_error("Size of FPS queue larger than max allowable!");
+      }
+    }
 
     // map OSPRay frame buffer, update OpenGL texture with its contents, then
     // unmap
@@ -484,7 +496,8 @@ void GLFWOSPRayWindow::setCamera(const vec3f &camEye,
 void GLFWOSPRayWindow::updateTitleBar()
 {
   std::stringstream windowTitle;
-  windowTitle << "OSPRay: " << std::setprecision(3) << latestFPS << " fps";
+  windowTitle << "FPS: " << std::setprecision(3) << latestFPS << "," <<
+    "Average FPS: " << avgFPS << " (" << movingAvgWindowSize << "-frame moving window)";
   if (latestFPS < 2.f) {
     float progress = ospGetProgress(currentFrame);
     windowTitle << " | ";

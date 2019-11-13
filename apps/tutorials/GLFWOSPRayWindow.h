@@ -24,6 +24,7 @@
 #include "ospcommon/containers/TransactionalBuffer.h"
 // std
 #include <functional>
+#include <queue>
 
 class GLFWOSPRayWindow
 {
@@ -120,4 +121,9 @@ class GLFWOSPRayWindow
 
   // FPS measurement of last frame
   float latestFPS{0.f};
+
+  // Running average FPS measurement
+  static const int movingAvgWindowSize{100};
+  std::queue<float> fpsQueue;
+  float avgFPS{0.f};
 };
