@@ -18,7 +18,7 @@
 
 ArcballCamera::ArcballCamera(const ospcommon::math::box3f &worldBounds,
                              const ospcommon::math::vec2i &windowSize)
-    : zoomSpeed(1),
+    : worldDiag(1),
       invWindowSize(ospcommon::math::vec2f(1.0) /
                     ospcommon::math::vec2f(windowSize)),
       centerTranslation(ospcommon::math::one),
@@ -26,7 +26,7 @@ ArcballCamera::ArcballCamera(const ospcommon::math::box3f &worldBounds,
       rotation(ospcommon::math::one)
 {
   ospcommon::math::vec3f diag = worldBounds.size();
-  zoomSpeed = ospcommon::math::max(length(diag) / 150.0, 0.001);
+  worldDiag = ospcommon::math::max(length(diag), 1.f);
   diag =
       ospcommon::math::max(diag, ospcommon::math::vec3f(0.3f * length(diag)));
 
@@ -46,7 +46,7 @@ void ArcballCamera::rotate(const ospcommon::math::vec2f &from,
 
 void ArcballCamera::zoom(float amount)
 {
-  amount *= zoomSpeed;
+  amount *= (std::max(translation.p.z / worldDiag, 0.001f));
   translation = ospcommon::math::AffineSpace3f::translate(
                     ospcommon::math::vec3f(0, 0, amount)) *
                 translation;

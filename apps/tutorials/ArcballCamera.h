@@ -47,7 +47,7 @@ class ArcballCamera
   ospcommon::math::quaternionf screenToArcball(
       const ospcommon::math::vec2f &p);
 
-  float zoomSpeed;
+  float worldDiag;
   ospcommon::math::vec2f invWindowSize;
   ospcommon::math::AffineSpace3f centerTranslation, translation, invCamera;
   ospcommon::math::quaternionf rotation;
