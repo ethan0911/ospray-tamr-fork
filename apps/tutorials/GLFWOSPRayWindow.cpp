@@ -372,7 +372,7 @@ void GLFWOSPRayWindow::display()
                                                               displayStart);
 
     latestFPS = 1000.f / float(durationMilliseconds.count());
-    if(latestFPS < std::numeric_limits<float>::infinity()){
+    if(!firstFrame && latestFPS < std::numeric_limits<float>::infinity()){
       fpsQueue.push(latestFPS);
       avgFPS += latestFPS/float(movingAvgWindowSize);
       if (fpsQueue.size() == movingAvgWindowSize + 1){
