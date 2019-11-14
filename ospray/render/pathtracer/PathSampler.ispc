@@ -185,13 +185,25 @@ void samplePath(const PathContext& pathContext,
     ShadingContext_Constructor(&ctx);
     if (pathVertex.type == SURFACE) {
       uniform PathTraceMaterial* material = (uniform PathTraceMaterial*)pathVertex.dg.material;
+
+      vec3f origP = pathVertex.dg.P;
+      foreach_unique(instID in ray.instID)
+      {
+        if (instID != RTC_INVALID_GEOMETRY_ID) {
+          Instance *uniform instance = *(pathContext.world->instances + instID);
+          pathVertex.dg.P = xfmPoint(instance->xfm, pathVertex.dg.P);
+        }
+      }
+
       foreach_unique(m in material)
         if (m != NULL)
           pathVertex.bsdf = m->getBSDF(m, &ctx, pathVertex.dg, ray, pathState.currentMedium);
       // terminate path when we don't have any BSDF
       if (!pathVertex.bsdf)
         break;
+
       pathVertex.albedo = pathVertex.bsdf->albedo;
+      pathVertex.dg.P = origP;
     }
 
     // next event estimation
