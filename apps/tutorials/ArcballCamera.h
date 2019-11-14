@@ -34,7 +34,8 @@ class ArcballCamera
   ospcommon::math::vec3f center() const;
   ospcommon::math::vec3f lookDir() const;
   ospcommon::math::vec3f upDir() const;
-
+  
+  void setCenter(const ospcommon::math::vec3f &center);
 
   void setRotation(ospcommon::math::quaternionf);
 

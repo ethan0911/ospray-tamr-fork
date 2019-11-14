@@ -50,6 +50,7 @@ void ArcballCamera::zoom(float amount)
   translation = ospcommon::math::AffineSpace3f::translate(
                     ospcommon::math::vec3f(0, 0, amount)) *
                 translation;
+  translation.p.z = std::max(translation.p.z, 0.0001f);
   updateCamera();
 }
 
@@ -91,6 +92,15 @@ void ArcballCamera::updateCamera()
   const ospcommon::math::AffineSpace3f camera =
       translation * rot * centerTranslation;
   invCamera = rcp(camera);
+}
+
+void ArcballCamera::setCenter(const ospcommon::math::vec3f &center)
+{
+  ospcommon::math::vec3f eye = eyePos();
+  centerTranslation = ospcommon::math::AffineSpace3f::translate(-center);
+  translation = ospcommon::math::AffineSpace3f::translate(
+      ospcommon::math::vec3f(0, 0, length(center - eye)));
+  updateCamera();
 }
 
 void ArcballCamera::setRotation(ospcommon::math::quaternionf q)

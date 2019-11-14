@@ -120,9 +120,9 @@ GLFWOSPRayWindow::GLFWOSPRayWindow(const vec2i &windowSize,
                      });
 
   glfwSetMouseButtonCallback(
-      glfwWindow, [](GLFWwindow *, int button, int action, int /*mods*/) {
+      glfwWindow, [](GLFWwindow *, int button, int action, int mods) {
         auto &w = *activeWindow;
-        if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS && (mods & GLFW_MOD_SHIFT)) {
           auto mouse      = activeWindow->previousMouse;
           auto windowSize = activeWindow->windowSize;
           const vec2f pos(
@@ -136,7 +136,10 @@ GLFWOSPRayWindow::GLFWOSPRayWindow(const vec2i &windowSize,
           if (res.hasHit) {
             std::cout << "Picked geometry [inst: " << res.instance
                       << ", model: " << res.model << ", prim: " << res.primID
-                      << "]" << std::endl;
+                      << "], position: " << res.worldPosition[0] << ", "
+                      << res.worldPosition[1] << ", " << res.worldPosition[2] << std::endl;
+            w.getArcballCamera()->setCenter(res.worldPosition);
+            w.updateCamera();
           }
         }
       });
@@ -285,6 +288,7 @@ void GLFWOSPRayWindow::updateCamera()
               arcballCamera->upDir().x,
               arcballCamera->upDir().y,
               arcballCamera->upDir().z);
+  addObjectToCommit(camera);
 }
 
 void GLFWOSPRayWindow::commitCamera()
@@ -322,7 +326,6 @@ void GLFWOSPRayWindow::motion(const vec2f &position)
 
     if (cameraChanged) {
       updateCamera();
-      addObjectToCommit(camera);
     }
   }
 
