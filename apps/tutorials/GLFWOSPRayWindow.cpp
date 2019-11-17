@@ -16,6 +16,7 @@
 
 #include "GLFWOSPRayWindow.h"
 #include <iostream>
+#include <iomanip>
 #include <limits>
 #include <stdexcept>
 #include <imgui.h>
@@ -499,7 +500,8 @@ void GLFWOSPRayWindow::setCamera(const vec3f &camEye,
 void GLFWOSPRayWindow::updateTitleBar()
 {
   std::stringstream windowTitle;
-  windowTitle << "FPS: " << std::setprecision(3) << latestFPS << "," <<
+  windowTitle << std::fixed;
+  windowTitle << "FPS: " << std::setprecision(2) << latestFPS << "," <<
     "Average FPS: " << avgFPS << " (" << movingAvgWindowSize << "-frame moving window)";
   if (latestFPS < 2.f) {
     float progress = ospGetProgress(currentFrame);
